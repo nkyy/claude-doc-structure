@@ -1,0 +1,78 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+        
+    - name: Build binaries
+      run: make release
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          bin/claude-docs-*
+        generate_release_notes: true
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Update Homebrew tap
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        # Calculate checksums for macOS binaries
+        DARWIN_AMD64_SHA256=$(shasum -a 256 bin/claude-docs-darwin-amd64 | cut -d' ' -f1)
+        DARWIN_ARM64_SHA256=$(shasum -a 256 bin/claude-docs-darwin-arm64 | cut -d' ' -f1)
+        VERSION=${GITHUB_REF#refs/tags/v}
+        
+        # Clone homebrew tap repository
+        git clone https://github.com/${{ github.repository_owner }}/homebrew-claude-doc.git tap
+        cd tap
+        
+        # Update formula
+        cat > Formula/claude-doc.rb << EOF
+        class ClaudeDoc < Formula
+          desc "Documentation toolkit optimized for Claude Code AI assistant"
+          homepage "https://github.com/${{ github.repository }}"
+          version "$VERSION"
+          
+          if OS.mac? && Hardware::CPU.intel?
+            url "https://github.com/${{ github.repository }}/releases/download/v$VERSION/claude-docs-darwin-amd64"
+            sha256 "$DARWIN_AMD64_SHA256"
+          elsif OS.mac? && Hardware::CPU.arm?
+            url "https://github.com/${{ github.repository }}/releases/download/v$VERSION/claude-docs-darwin-arm64"
+            sha256 "$DARWIN_ARM64_SHA256"
+          end
+          
+          def install
+            bin.install Dir["claude-docs-*"].first => "claude-docs"
+          end
+          
+          test do
+            system "#{bin}/claude-docs", "--help"
+          end
+        end
+        EOF
+        
+        # Commit and push
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add Formula/claude-doc.rb
+        git commit -m "Update claude-doc to v$VERSION"
+        git push https://x-access-token:${{ secrets.HOMEBREW_TAP_TOKEN }}@github.com/${{ github.repository_owner }}/homebrew-claude-doc.git main

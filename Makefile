@@ -46,7 +46,6 @@ install: build
 clean:
 	@echo "Cleaning up build artifacts..."
 	rm -rf bin/
-	rm -rf dist/
 	go clean
 	@echo "Clean complete."
 
@@ -84,25 +83,25 @@ validate:
 # Build for multiple platforms
 release:
 	@echo "Building release binaries..."
-	@mkdir -p dist
+	@mkdir -p bin
 	
 	# Linux amd64
-	GOOS=linux GOARCH=amd64 go build -o dist/claude-docs-linux-amd64 .
+	GOOS=linux GOARCH=amd64 go build -o bin/claude-docs-linux-amd64 .
 	
 	# Linux arm64
-	GOOS=linux GOARCH=arm64 go build -o dist/claude-docs-linux-arm64 .
+	GOOS=linux GOARCH=arm64 go build -o bin/claude-docs-linux-arm64 .
 	
 	# macOS amd64 (Intel)
-	GOOS=darwin GOARCH=amd64 go build -o dist/claude-docs-darwin-amd64 .
+	GOOS=darwin GOARCH=amd64 go build -o bin/claude-docs-darwin-amd64 .
 	
 	# macOS arm64 (Apple Silicon)
-	GOOS=darwin GOARCH=arm64 go build -o dist/claude-docs-darwin-arm64 .
+	GOOS=darwin GOARCH=arm64 go build -o bin/claude-docs-darwin-arm64 .
 	
 	# Windows amd64
-	GOOS=windows GOARCH=amd64 go build -o dist/claude-docs-windows-amd64.exe .
+	GOOS=windows GOARCH=amd64 go build -o bin/claude-docs-windows-amd64.exe .
 	
-	@echo "Release binaries built in dist/ directory:"
-	@ls -la dist/
+	@echo "Release binaries built in bin/ directory:"
+	@ls -la bin/
 
 # Quick setup
 quick-setup: build init
