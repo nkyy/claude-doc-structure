@@ -1,0 +1,617 @@
+#!/usr/bin/env python3
+"""
+Claude Documentation Tool
+A unified CLI for managing documentation in Claude Code projects.
+
+Usage:
+    claude-docs init [project-name]           # Initialize documentation structure
+    claude-docs split <file> [options]        # Split large documents
+    claude-docs merge <directory> [options]   # Merge multiple documents
+    claude-docs template <type> [name]        # Generate documentation templates
+    claude-docs validate [directory]          # Validate documentation structure
+"""
+
+import argparse
+import sys
+import os
+from pathlib import Path
+
+# Add the scripts directory to the path so we can import our modules
+script_dir = Path(__file__).parent / 'scripts'
+sys.path.insert(0, str(script_dir))
+
+try:
+    from split_docs import DocumentSplitter
+    from merge_docs import DocumentMerger
+except ImportError as e:
+    print(f"Error importing required modules: {e}")
+    sys.exit(1)
+
+
+def init_project(project_name: str = None):
+    """Initialize Claude documentation structure in current directory."""
+    if not project_name:
+        project_name = Path.cwd().name
+    
+    print(f"Initializing Claude documentation structure for '{project_name}'...")
+    
+    # Create basic structure
+    directories = [
+        'specs',
+        '.claude/prompts',
+        '.claude/templates'
+    ]
+    
+    for dir_path in directories:
+        Path(dir_path).mkdir(parents=True, exist_ok=True)
+        print(f"Created directory: {dir_path}")
+    
+    # Create CLAUDE.md template
+    claude_md_content = f"""# {project_name}
+
+## Project Overview
+
+Brief description of your project and its purpose.
+
+## Architecture & Technology Stack
+
+**Core Technologies:**
+- List your main technologies here
+- Framework versions
+- Key dependencies
+
+**Key Components:**
+- Component 1: Description
+- Component 2: Description
+
+## Project Structure
+
+```
+{project_name}/
+├── src/                    # Source code
+├── docs/                   # Documentation
+├── tests/                  # Test files
+├── CLAUDE.md              # This file - project context for Claude Code
+└── specs/                 # Detailed specifications
+    ├── api.md             # API documentation
+    └── screens.md         # UI/screen specifications
+```
+
+## Current Development Focus
+
+Describe what you're currently working on or planning to implement.
+
+## Key Files
+
+- `src/main.js:1` - Main application entry point
+- `src/components/App.js:15` - Main application component
+- `src/utils/helpers.js:8` - Utility functions
+
+## Dependencies
+
+List key dependencies and their purposes:
+- dependency-name: Purpose and version
+
+## Usage Guidelines
+
+Instructions for running, building, and testing the project.
+"""
+    
+    claude_md_path = Path('CLAUDE.md')
+    if not claude_md_path.exists():
+        with open(claude_md_path, 'w', encoding='utf-8') as f:
+            f.write(claude_md_content)
+        print(f"Created: {claude_md_path}")
+    else:
+        print(f"CLAUDE.md already exists, skipping...")
+    
+    # Create specs templates
+    api_template = """# API Documentation
+
+## Endpoints
+
+### GET /api/endpoint
+Description of the endpoint.
+
+**Parameters:**
+- param1 (string): Description
+- param2 (number): Description
+
+**Response:**
+```json
+{
+  "example": "response"
+}
+```
+
+**Example:**
+```bash
+curl -X GET "http://localhost:3000/api/endpoint?param1=value"
+```
+"""
+    
+    screens_template = """# Screen Specifications
+
+## Screen Name
+
+### Purpose
+What this screen is for and when it's used.
+
+### Layout
+Description of the visual layout and components.
+
+### User Interactions
+- Action 1: What happens
+- Action 2: What happens
+
+### API Calls
+- Endpoint used: Purpose
+- Data displayed: Source
+
+### Navigation
+- From: Where users come from
+- To: Where users can go next
+"""
+    
+    specs_files = {
+        'specs/api.md': api_template,
+        'specs/screens.md': screens_template
+    }
+    
+    for file_path, content in specs_files.items():
+        path = Path(file_path)
+        if not path.exists():
+            with open(path, 'w', encoding='utf-8') as f:
+                f.write(content)
+            print(f"Created: {path}")
+    
+    print(f"\nDocumentation structure initialized successfully!")
+    print("Next steps:")
+    print("1. Edit CLAUDE.md with your project details")
+    print("2. Update specs/api.md and specs/screens.md")
+    print("3. Start collaborating with Claude Code!")
+
+
+def split_document(input_file: str, **kwargs):
+    """Split a document using the DocumentSplitter."""
+    splitter = DocumentSplitter(
+        input_file,
+        kwargs.get('output_dir'),
+        kwargs.get('prefix', '')
+    )
+    
+    method = 'headers'
+    if kwargs.get('by_lines'):
+        method = 'lines'
+    elif kwargs.get('by_size'):
+        method = 'size'
+    
+    splitter.split(
+        method=method,
+        max_sections=kwargs.get('max_sections', 10),
+        header_level=kwargs.get('header_level', 2),
+        lines_per_file=kwargs.get('lines_per_file', 200),
+        max_size_kb=kwargs.get('max_size_kb', 100),
+        add_navigation=not kwargs.get('no_navigation', False)
+    )
+
+
+def merge_documents(input_directory: str, **kwargs):
+    """Merge documents using the DocumentMerger."""
+    merger = DocumentMerger(input_directory, kwargs.get('output', 'merged-docs.md'))
+    
+    merger.merge(
+        pattern=kwargs.get('pattern', '*.md'),
+        recursive=kwargs.get('recursive', False),
+        exclude=kwargs.get('exclude', []),
+        add_toc=not kwargs.get('no_toc', False),
+        add_dividers=not kwargs.get('no_dividers', False),
+        preserve_structure=not kwargs.get('no_structure', False),
+        add_summary=not kwargs.get('no_summary', False),
+        optimize_claude=not kwargs.get('no_claude_optimization', False)
+    )
+
+
+def generate_template(template_type: str, name: str = None):
+    """Generate documentation templates."""
+    templates = {
+        'api': {
+            'filename': 'api-endpoint.md',
+            'content': '''# {name} API Endpoint
+
+## Overview
+Brief description of what this endpoint does.
+
+## HTTP Method and URL
+```
+GET/POST/PUT/DELETE /api/{name}
+```
+
+## Parameters
+
+### Path Parameters
+- `id` (string): Description
+
+### Query Parameters
+- `param1` (string, optional): Description
+- `param2` (number, required): Description
+
+### Request Body
+```json
+{{
+  "field1": "value",
+  "field2": 123
+}}
+```
+
+## Response
+
+### Success Response (200 OK)
+```json
+{{
+  "success": true,
+  "data": {{
+    "result": "value"
+  }}
+}}
+```
+
+### Error Responses
+- `400 Bad Request`: Invalid parameters
+- `404 Not Found`: Resource not found
+- `500 Internal Server Error`: Server error
+
+## Examples
+
+### Request
+```bash
+curl -X GET "http://localhost:3000/api/{name}?param1=value" \\
+  -H "Content-Type: application/json"
+```
+
+### Response
+```json
+{{
+  "success": true,
+  "data": []
+}}
+```
+
+## Notes
+Additional implementation notes or considerations.
+'''
+        },
+        'screen': {
+            'filename': 'screen-spec.md',
+            'content': '''# {name} Screen Specification
+
+## Overview
+Brief description of the screen's purpose and functionality.
+
+## User Stories
+- As a [user type], I want to [goal] so that [benefit]
+- As a [user type], I want to [goal] so that [benefit]
+
+## Layout & Components
+
+### Header Section
+- Component 1: Description and behavior
+- Component 2: Description and behavior
+
+### Main Content
+- Component 1: Description and behavior
+- Component 2: Description and behavior
+
+### Footer/Actions
+- Button 1: What it does
+- Button 2: What it does
+
+## User Interactions
+
+### Primary Actions
+1. Action 1: Step-by-step description
+2. Action 2: Step-by-step description
+
+### Secondary Actions
+- Action A: Description
+- Action B: Description
+
+## Data Requirements
+
+### API Calls
+- `GET /api/endpoint`: Purpose and when called
+- `POST /api/endpoint`: Purpose and when called
+
+### State Management
+- State 1: Description and initial value
+- State 2: Description and initial value
+
+## Navigation
+
+### Entry Points
+- From Screen A: Via action/button
+- From Screen B: Via navigation
+
+### Exit Points
+- To Screen C: Via action/button
+- To Screen D: Via navigation
+
+## Validation Rules
+- Field 1: Validation requirements
+- Field 2: Validation requirements
+
+## Error Handling
+- Error Type 1: How it's displayed/handled
+- Error Type 2: How it's displayed/handled
+
+## Responsive Behavior
+Description of how the screen adapts to different screen sizes.
+
+## Accessibility
+- ARIA labels and roles
+- Keyboard navigation
+- Screen reader considerations
+
+## Notes
+Additional implementation notes, design decisions, or technical considerations.
+'''
+        },
+        'feature': {
+            'filename': 'feature-spec.md',
+            'content': '''# {name} Feature Specification
+
+## Overview
+High-level description of the feature and its business value.
+
+## Requirements
+
+### Functional Requirements
+1. Requirement 1: Detailed description
+2. Requirement 2: Detailed description
+3. Requirement 3: Detailed description
+
+### Non-Functional Requirements
+- Performance: Expected response times, throughput
+- Security: Authentication, authorization, data protection
+- Usability: User experience considerations
+- Compatibility: Browser/platform support
+
+## User Stories
+- As a [user type], I want to [goal] so that [benefit]
+- As a [user type], I want to [goal] so that [benefit]
+- As a [user type], I want to [goal] so that [benefit]
+
+## Technical Design
+
+### Architecture Overview
+Description of how the feature fits into the overall system architecture.
+
+### Components
+- Component 1: Responsibility and interfaces
+- Component 2: Responsibility and interfaces
+- Component 3: Responsibility and interfaces
+
+### Data Model
+```
+Entity 1:
+- field1: type, description
+- field2: type, description
+
+Entity 2:
+- field1: type, description
+- field2: type, description
+```
+
+### API Design
+- `GET /api/{name}`: List/retrieve resources
+- `POST /api/{name}`: Create new resource
+- `PUT /api/{name}/:id`: Update existing resource
+- `DELETE /api/{name}/:id`: Delete resource
+
+## Implementation Plan
+
+### Phase 1: Core Functionality
+- [ ] Task 1: Description
+- [ ] Task 2: Description
+- [ ] Task 3: Description
+
+### Phase 2: Enhanced Features
+- [ ] Task 1: Description
+- [ ] Task 2: Description
+
+### Phase 3: Polish & Optimization
+- [ ] Task 1: Description
+- [ ] Task 2: Description
+
+## Testing Strategy
+
+### Unit Tests
+- Component 1: Test scenarios
+- Component 2: Test scenarios
+
+### Integration Tests
+- API endpoints: Test scenarios
+- Database operations: Test scenarios
+
+### User Acceptance Tests
+- User Story 1: Test scenarios
+- User Story 2: Test scenarios
+
+## Deployment Considerations
+- Database migrations
+- Configuration changes
+- Feature flags
+- Rollback procedures
+
+## Success Metrics
+- Metric 1: Target value and measurement method
+- Metric 2: Target value and measurement method
+
+## Risks & Mitigation
+- Risk 1: Description and mitigation strategy
+- Risk 2: Description and mitigation strategy
+
+## Future Considerations
+Ideas for future enhancements or related features.
+'''
+        }
+    }
+    
+    if template_type not in templates:
+        print(f"Unknown template type: {template_type}")
+        print(f"Available templates: {', '.join(templates.keys())}")
+        return
+    
+    template = templates[template_type]
+    if not name:
+        name = f"example-{template_type}"
+    
+    filename = template['filename'].replace(template_type + '-', f"{name}-")
+    content = template['content'].format(name=name)
+    
+    # Create templates directory if it doesn't exist
+    templates_dir = Path('.claude/templates')
+    templates_dir.mkdir(parents=True, exist_ok=True)
+    
+    file_path = templates_dir / filename
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(content)
+    
+    print(f"Generated template: {file_path}")
+
+
+def validate_structure(directory: str = '.'):
+    """Validate Claude documentation structure."""
+    directory = Path(directory)
+    
+    print(f"Validating documentation structure in: {directory}")
+    
+    issues = []
+    recommendations = []
+    
+    # Check for CLAUDE.md
+    claude_md = directory / 'CLAUDE.md'
+    if not claude_md.exists():
+        issues.append("Missing CLAUDE.md file (main project context)")
+    else:
+        # Check CLAUDE.md content
+        with open(claude_md, 'r', encoding='utf-8') as f:
+            content = f.read()
+            if len(content) < 200:
+                recommendations.append("CLAUDE.md seems quite short - consider adding more project context")
+            if 'Project Overview' not in content:
+                recommendations.append("Consider adding a 'Project Overview' section to CLAUDE.md")
+    
+    # Check for specs directory
+    specs_dir = directory / 'specs'
+    if not specs_dir.exists():
+        recommendations.append("Consider creating a 'specs/' directory for detailed specifications")
+    else:
+        spec_files = list(specs_dir.glob('*.md'))
+        if not spec_files:
+            recommendations.append("specs/ directory exists but contains no markdown files")
+    
+    # Check for .claude directory
+    claude_dir = directory / '.claude'
+    if not claude_dir.exists():
+        recommendations.append("Consider creating a '.claude/' directory for Claude-specific assets")
+    else:
+        prompts_dir = claude_dir / 'prompts'
+        templates_dir = claude_dir / 'templates'
+        
+        if not prompts_dir.exists():
+            recommendations.append("Consider creating '.claude/prompts/' for reusable prompts")
+        if not templates_dir.exists():
+            recommendations.append("Consider creating '.claude/templates/' for documentation templates")
+    
+    # Report results
+    if issues:
+        print("\n❌ Issues found:")
+        for issue in issues:
+            print(f"  - {issue}")
+    
+    if recommendations:
+        print("\n💡 Recommendations:")
+        for rec in recommendations:
+            print(f"  - {rec}")
+    
+    if not issues and not recommendations:
+        print("\n✅ Documentation structure looks good!")
+    
+    print(f"\nScanned {len(list(directory.rglob('*.md')))} markdown files")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Claude Documentation Tool - Unified CLI for Claude Code documentation management"
+    )
+    
+    subparsers = parser.add_subparsers(dest='command', help='Available commands')
+    
+    # Init command
+    init_parser = subparsers.add_parser('init', help='Initialize documentation structure')
+    init_parser.add_argument('project_name', nargs='?', help='Project name (default: current directory name)')
+    
+    # Split command
+    split_parser = subparsers.add_parser('split', help='Split large documents')
+    split_parser.add_argument('input_file', help='Input markdown file to split')
+    split_parser.add_argument('--output-dir', help='Output directory')
+    split_parser.add_argument('--prefix', default='', help='Filename prefix')
+    split_parser.add_argument('--by-headers', action='store_true', help='Split by headers (default)')
+    split_parser.add_argument('--by-lines', action='store_true', help='Split by line count')
+    split_parser.add_argument('--by-size', action='store_true', help='Split by file size')
+    split_parser.add_argument('--max-sections', type=int, default=10, help='Max sections')
+    split_parser.add_argument('--header-level', type=int, default=2, help='Header level to split on')
+    split_parser.add_argument('--lines-per-file', type=int, default=200, help='Lines per file')
+    split_parser.add_argument('--max-size-kb', type=int, default=100, help='Max file size in KB')
+    split_parser.add_argument('--no-navigation', action='store_true', help='Skip navigation links')
+    
+    # Merge command
+    merge_parser = subparsers.add_parser('merge', help='Merge multiple documents')
+    merge_parser.add_argument('input_directory', help='Directory with files to merge')
+    merge_parser.add_argument('--output', default='merged-docs.md', help='Output filename')
+    merge_parser.add_argument('--pattern', default='*.md', help='File pattern')
+    merge_parser.add_argument('--exclude', nargs='*', default=[], help='Files to exclude')
+    merge_parser.add_argument('--recursive', action='store_true', help='Search recursively')
+    merge_parser.add_argument('--no-toc', action='store_true', help='Skip table of contents')
+    merge_parser.add_argument('--no-dividers', action='store_true', help='Skip section dividers')
+    merge_parser.add_argument('--no-structure', action='store_true', help='Skip link processing')
+    merge_parser.add_argument('--no-summary', action='store_true', help='Skip summary section')
+    merge_parser.add_argument('--no-claude-optimization', action='store_true', help='Skip Claude optimization')
+    
+    # Template command
+    template_parser = subparsers.add_parser('template', help='Generate documentation templates')
+    template_parser.add_argument('type', choices=['api', 'screen', 'feature'], help='Template type')
+    template_parser.add_argument('name', nargs='?', help='Template name')
+    
+    # Validate command
+    validate_parser = subparsers.add_parser('validate', help='Validate documentation structure')
+    validate_parser.add_argument('directory', nargs='?', default='.', help='Directory to validate')
+    
+    args = parser.parse_args()
+    
+    if not args.command:
+        parser.print_help()
+        return
+    
+    try:
+        if args.command == 'init':
+            init_project(args.project_name)
+        elif args.command == 'split':
+            split_document(args.input_file, **vars(args))
+        elif args.command == 'merge':
+            merge_documents(args.input_directory, **vars(args))
+        elif args.command == 'template':
+            generate_template(args.type, args.name)
+        elif args.command == 'validate':
+            validate_structure(args.directory)
+    except KeyboardInterrupt:
+        print("\nOperation cancelled by user")
+        sys.exit(1)
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()
