@@ -9,109 +9,131 @@ Claude Doc Structure is a documentation toolkit that provides templates, tools, 
 ## Architecture & Technology Stack
 
 **Core Technologies:**
-- Python 3.8+ (standard library only, no external dependencies)
+- Go 1.21+ (single binary, zero dependencies at runtime)
 - Bash scripting for automation
 - Markdown for all documentation templates
 
 **Key Components:**
-- CLI tool (`tools/cli/claude-docs`) - Unified command interface
-- Document processing scripts (`tools/scripts/`) - Split/merge utilities
+- CLI tool (`main.go` + `cmd/`) - Unified command interface in Go
+- Document processing (`internal/splitter`, `internal/merger`) - Split/merge utilities
 - Template system (`templates/`) - User-facing documentation templates
-- Development tools (`tools/`) - Testing and automation
+- Build system (`Makefile`) - Cross-platform binary generation
 
 ## Project Structure
 
 ```
 claude-doc-structure/
-├── templates/                  # User-facing templates (copied to projects)
-│   ├── .claude/               # Claude-specific assets
-│   ├── specs/                 # Documentation templates
-│   ├── examples/              # Reference implementations
-│   └── CLAUDE.md              # Generic project template
-├── tools/                     # Development tools
-│   ├── cli/claude-docs        # Main CLI application
-│   ├── scripts/               # Document processing utilities
-│   └── tests/                 # Test suite
-├── setup.py & pyproject.toml  # Package configuration
-└── Makefile                   # Development automation
+├── main.go                    # CLI entry point
+├── go.mod                     # Go module definition
+├── cmd/                       # CLI commands (cobra-based)
+│   ├── root.go               # Root command setup
+│   ├── init.go               # Project initialization
+│   ├── split.go              # Document splitting
+│   ├── merge.go              # Document merging
+│   ├── template.go           # Template generation
+│   └── validate.go           # Structure validation
+├── internal/                  # Internal packages
+│   ├── splitter/             # Document splitting logic
+│   └── merger/               # Document merging logic
+├── templates/                 # User-facing templates
+│   ├── .claude/              # Claude-specific assets
+│   ├── specs/                # Documentation templates
+│   └── examples/             # Reference implementations
+└── Makefile                  # Build automation
 ```
 
 ## Common Development Commands
 
-**Installation & Setup:**
+**Build & Installation:**
 ```bash
-make install                   # Install CLI tool locally
-pip install -e .              # Install in development mode
-pip install -e ".[dev]"       # Install with dev dependencies
+make build                     # Build single binary
+make install                   # Install to GOPATH/bin
+make release                   # Build for all platforms
 ```
 
-**CLI Testing:**
+**Development:**
 ```bash
-tools/cli/claude-docs --help          # Test CLI functionality
-tools/cli/claude-docs init test-proj  # Test project initialization
-tools/cli/claude-docs validate        # Test structure validation
-```
-
-**Script Testing:**
-```bash
-python tools/scripts/split_docs.py --help
-python tools/scripts/merge_docs.py --help
-```
-
-**Quality Checks:**
-```bash
+make dev                       # Run in development mode
+make run CMD="init myproject"  # Run with arguments
 make test                      # Run test suite
-make lint                      # Code quality checks (black, flake8, mypy)
-make clean                     # Clean build artifacts
+make fmt                       # Format code
+make lint                      # Code quality checks
+```
+
+**CLI Usage:**
+```bash
+./bin/claude-docs --help      # Show help
+./bin/claude-docs init         # Initialize project
+./bin/claude-docs validate     # Validate structure
+./bin/claude-docs split README.md --by-headers
+./bin/claude-docs merge docs/ --output combined.md
 ```
 
 ## Key Implementation Details
 
 **CLI Architecture:**
-- `tools/cli/claude-docs:31` - Project initialization using templates/
-- `tools/cli/claude-docs:175` - Document splitting functionality
-- `tools/cli/claude-docs:215` - Template generation system
-- `tools/cli/claude-docs:483` - Structure validation logic
+- `cmd/root.go` - Cobra-based CLI with subcommands
+- `cmd/init.go` - Project initialization with template generation
+- `cmd/split.go` - Document splitting with multiple methods
+- `cmd/merge.go` - Document merging with Claude optimization
+- `cmd/template.go` - Template generation system
+- `cmd/validate.go` - Structure validation logic
 
 **Document Processing:**
-- `tools/scripts/split_docs.py:24` - DocumentSplitter class for large files
-- `tools/scripts/split_docs.py:45` - Header-based splitting algorithm
-- `tools/scripts/merge_docs.py:26` - DocumentMerger for combining files
+- `internal/splitter/splitter.go` - Multi-method document splitting
+- `internal/merger/merger.go` - Smart document merging with TOC
+- Supports splitting by headers, lines, or file size
+- Merging includes Claude-specific optimizations
 
-**Template System:**
-- Templates in `templates/` are copied to user projects
-- CLI references `templates/.claude/` for Claude-specific assets
-- Template placeholders use `{PROJECT_NAME}` format
+**Build System:**
+- Single binary compilation with zero runtime dependencies
+- Cross-platform builds for Linux, macOS, Windows (x64/ARM64)
+- Template placeholders use `{name}` format
 
 ## Current Development Focus
 
-**Path Migration (In Progress):**
-The project was recently restructured to separate user templates from development tools. Key updates needed:
-- CLI script paths: Update template source paths from legacy structure
-- Setup configuration: Ensure `setup.py` points to correct script location
-- Documentation: Update README and help text for new structure
+**Go Migration (Completed):**
+The project has been migrated from Python to Go for better environment independence:
+- ✅ Zero runtime dependencies - single binary deployment
+- ✅ Cross-platform builds for all major platforms  
+- ✅ Improved performance and faster startup times
+- ✅ Maintained all original functionality and CLI interface
 
-**Configuration Notes:**
-- `setup.py:55` - References correct CLI script path: `tools/cli/claude-docs`
-- `pyproject.toml:47` - Uses entry point for CLI installation
-- `Makefile` - Provides convenient development shortcuts
+**Next Steps:**
+- Add comprehensive test suite
+- Implement GitHub Actions for automated releases
+- Add configuration file support (.claude-docs.yaml)
+- Enhanced template customization options
+
+**Documentation Maintenance:**
+- **IMPORTANT**: When making improvements or changes to the project, always update the README.md to reflect:
+  - New features and capabilities
+  - Changed installation instructions
+  - Updated command examples
+  - Modified project structure
+- Keep README.md synchronized with actual functionality
+- Update badges and version information as needed
+- Ensure all code examples in README.md are tested and working
 
 ## Testing Strategy
 
 **Manual Testing:**
-1. Test CLI commands: `tools/cli/claude-docs [command]`
-2. Test document processing: Use sample markdown files
-3. Test template generation: Verify output structure
-4. Test Makefile shortcuts: `make [command]`
+1. Build and test: `make build && ./bin/claude-docs --help`
+2. Test commands: `make run CMD="init test-project"`
+3. Test document processing: Use sample markdown files
+4. Test cross-platform builds: `make release`
 
 **Automated Testing:**
-- `tools/tests/test_cli.py` - CLI functionality tests
-- Use `pytest` for test execution
-- Code quality tools: black, flake8, mypy (optional)
+- `go test ./...` - Run all tests
+- `make test` - Convenient test execution
+- `make lint` - Code quality checks with golangci-lint
 
 ## Dependencies
 
-**Runtime:** None (uses Python standard library only)
-**Development:** pytest, black, flake8, mypy (optional via `pip install -e ".[dev]"`)
+**Runtime:** None (single binary, zero dependencies)
+**Development:** 
+- Go 1.21+ for building
+- golangci-lint for code quality (optional)
+- Make for build automation
 
-This tool is designed to be dependency-free for easy adoption across different environments.
+This tool achieves true environment independence with single binary distribution.

@@ -3,8 +3,9 @@
 Claude Code との効率的な協働のための包括的なドキュメントツールキット。整理されたプロジェクトコンテキスト、自動化ツール、再利用可能なテンプレートで開発ワークフローを効率化します。
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
+[![Go](https://img.shields.io/badge/Go-1.21%2B-blue.svg)](https://golang.org/)
 [![CLI Tool](https://img.shields.io/badge/CLI-Tool-brightgreen.svg)](https://github.com/your-username/claude-doc-structure)
+[![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-green.svg)]()
 
 ## 🎯 目的
 
@@ -17,46 +18,44 @@ Claude Code との効率的な協働のための包括的なドキュメント�
 
 ## 🚀 クイックスタート
 
-### 方法 1：CLI ツールを使用（推奨）
+### 方法 1：バイナリダウンロード（推奨）
 
-1. **ツールをインストール：**
+1. **お使いのプラットフォーム用のバイナリをダウンロード** [Releases](https://github.com/your-username/claude-doc-structure/releases)から
 
+2. **実行可能にしてPATHに追加：**
    ```bash
-   git clone https://github.com/your-username/claude-doc-structure.git
-   cd claude-doc-structure
-   make install
+   chmod +x claude-docs
+   sudo mv claude-docs /usr/local/bin/
    ```
 
-2. **プロジェクトを初期化：**
-
+3. **すぐに使用開始：**
    ```bash
    claude-docs init my-project
-   ```
-
-3. **ツールを使い始める：**
-
-   ```bash
-   # テンプレート生成
    claude-docs template api users
-
-   # 大きなドキュメントを分割
-   claude-docs split README.md --by-headers
-
-   # 複数のドキュメントを統合
-   claude-docs merge specs/ --output combined.md
-
-   # 構造を検証
    claude-docs validate
    ```
 
-### 方法 2：手動セットアップ
+### 方法 2：ソースからビルド
+
+1. **クローンしてビルド：**
+   ```bash
+   git clone https://github.com/your-username/claude-doc-structure.git
+   cd claude-doc-structure
+   make build
+   ```
+
+2. **バイナリを使用：**
+   ```bash
+   ./bin/claude-docs init my-project
+   ```
+
+### 方法 3：手動セットアップ
 
 1. **構造をコピー**してプロジェクトに追加：
 
    ```bash
    git clone https://github.com/your-username/claude-doc-structure.git
-   cp -r claude-doc-structure/.claude ./
-   cp claude-doc-structure/CLAUDE.md ./
+   cp -r claude-doc-structure/templates/* ./
    ```
 
 2. **CLAUDE.md をカスタマイズ**してプロジェクト詳細を記載し、協働を開始！
@@ -69,15 +68,17 @@ your-project/
 ├── specs/                 # 詳細仕様書
 │   ├── api.md            # APIドキュメント
 │   └── screens.md        # UI/UX仕様書
-├── .claude/              # Claude Code用アセット
-│   ├── prompts/          # 再利用可能なプロンプトテンプレート
-│   └── templates/        # ドキュメントテンプレート
-├── scripts/              # ドキュメント用ユーティリティ
-│   ├── split_docs.py     # 大きなドキュメントを小さなファイルに分割
-│   └── merge_docs.py     # 包括的なビューのためのドキュメント統合
-├── claude-docs           # 統合CLIツール
-├── Makefile             # 便利なショートカット
-└── setup.py             # パッケージ設定
+└── .claude/              # Claude Code用アセット
+    ├── prompts/          # 再利用可能なプロンプトテンプレート
+    └── templates/        # ドキュメントテンプレート
+
+claude-doc-structure/ (このリポジトリ)
+├── main.go               # CLIエントリーポイント
+├── go.mod               # Goモジュール定義
+├── cmd/                 # CLIコマンド
+├── internal/            # ドキュメント処理ロジック
+├── bin/claude-docs      # ビルドされたバイナリ (make build後)
+└── Makefile            # ビルド自動化
 ```
 
 ## 📖 ドキュメントアプローチ
@@ -99,7 +100,7 @@ your-project/
 **段階 3：階層構造（大規模プロジェクト）**
 
 - 機能とモジュール別に整理
-- 自動化された整理のために`scripts/split_docs.py`を使用
+- 自動化された整理のために`claude-docs split`を使用
 - ドキュメント間の相互参照を維持
 
 ### ベストプラクティス
@@ -137,29 +138,25 @@ claude-docs merge <directory> [options]   # 複数のドキュメントを統合
 claude-docs template <type> [name]        # ドキュメントテンプレートを生成
 ```
 
-### Makefile ショートカット
+### CLI オプション & 機能
 
-より簡単な使用のために提供された Makefile を使用：
-
+**ドキュメント分割：**
 ```bash
-make help                                  # すべての利用可能なコマンドを表示
-make init                                  # ドキュメント構造を初期化
-make split FILE=large-doc.md              # ドキュメントを分割
-make merge DIR=specs/                     # ドキュメントを統合
-make template TYPE=api NAME=users         # テンプレートを生成
-make validate                             # 構造を検証
+claude-docs split large-doc.md --by-headers --max-sections 8
+claude-docs split large-doc.md --by-size --max-size-kb 50
+claude-docs split large-doc.md --by-lines --lines-per-file 200
 ```
 
-### ドキュメント管理スクリプト
-
-**直接スクリプト使用（お好みで）：**
-
+**ドキュメント統合：**
 ```bash
-# 大きなドキュメントを分割
-python scripts/split_docs.py specs/large-spec.md --by-headers --max-sections 5
+claude-docs merge specs/ --output combined.md
+claude-docs merge docs/ --recursive --exclude "*.draft.md"
+claude-docs merge . --pattern "*.md" --no-claude-optimization
+```
 
-# 包括的なレビューのためのマージ
-python scripts/merge_docs.py specs/ --output combined.md
+**クロスプラットフォームビルド：**
+```bash
+make release    # Linux、macOS、Windows (x64 & ARM64) 用にビルド
 ```
 
 ### テンプレートシステム
@@ -270,54 +267,58 @@ GET/POST/PUT/DELETE /api/users
 
 ## 🚀 インストール
 
-### クイックインストール
+### バイナリインストール（推奨）
+```bash
+# GitHub Releasesからダウンロード
+curl -L https://github.com/your-username/claude-doc-structure/releases/latest/download/claude-docs-linux-amd64 -o claude-docs
+chmod +x claude-docs
+sudo mv claude-docs /usr/local/bin/
+```
 
+### ソースからビルド
 ```bash
 git clone https://github.com/your-username/claude-doc-structure.git
 cd claude-doc-structure
-make install
-```
-
-### 手動インストール
-
-```bash
-pip install -e .
+make build
+# バイナリは ./bin/claude-docs に生成されます
 ```
 
 ### 要件
-
-- Python 3.8+
-- 外部依存関係なし（標準ライブラリのみ使用）
+- **ランタイム**: なし（単一バイナリ、ゼロ依存）
+- **ビルド**: Go 1.21+（ソースからビルドする場合のみ）
 
 ## 🆘 トラブルシューティング
 
 **インストール後にコマンドが見つからない：**
 
 ```bash
-# スクリプトが実行可能か確認
+# バイナリが実行可能でPATHにあるか確認
 chmod +x claude-docs
+which claude-docs  # パスが表示されるはず
 
-# PATHに追加するかフルパスを使用
-export PATH=$PATH:$(pwd)
+# またはフルパスを使用
+./bin/claude-docs --help
 ```
 
 **権限エラー：**
 
 ```bash
-# 適切な権限で実行
-sudo make install
+# /usr/local/bin/ への書き込み権限があるか確認
+sudo mv claude-docs /usr/local/bin/
 ```
 
 **開発用：**
 
 ```bash
-# 開発モードでインストール
-pip install -e ".[dev]"
+# ビルドとテスト
+make build
+./bin/claude-docs --help
 
 # テスト実行
 make test
 
-# リント実行
+# コードのフォーマットとリント
+make fmt
 make lint
 ```
 
@@ -352,8 +353,9 @@ MIT ライセンス - 詳細は[LICENSE](LICENSE)をご覧ください。
 | 🔄 **ドキュメント統合**   | レビュー用に複数のドキュメントを結合               | `claude-docs merge`    |
 | 📝 **テンプレート生成**   | プロフェッショナルなドキュメントテンプレートを生成 | `claude-docs template` |
 | ✅ **構造検証**           | ドキュメントのベストプラクティスを検証             | `claude-docs validate` |
-| 🛠️ **Makefile サポート**  | すべての操作の便利なショートカット                 | `make help`            |
-| 📦 **簡単インストール**   | シンプルなインストールプロセス                     | `make install`         |
+| 🏗️ **クロスプラットフォーム** | Linux、macOS、Windows用の単一バイナリ          | `make release`         |
+| ⚡ **ゼロ依存**           | ランタイム依存関係不要                             | ダウンロード & 実行    |
+| 🎯 **Claude最適化**       | Claude Codeワークフロー専用設計                   | 全コマンド             |
 
 ---
 

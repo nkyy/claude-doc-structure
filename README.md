@@ -3,8 +3,9 @@
 A comprehensive documentation toolkit for efficient collaboration with Claude Code. Streamline your development workflow with organized project context, automated tools, and reusable templates.
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-[![Python](https://img.shields.io/badge/Python-3.8%2B-blue.svg)](https://www.python.org/)
+[![Go](https://img.shields.io/badge/Go-1.21%2B-blue.svg)](https://golang.org/)
 [![CLI Tool](https://img.shields.io/badge/CLI-Tool-brightgreen.svg)](https://github.com/your-username/claude-doc-structure)
+[![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-green.svg)]()
 
 ## 🎯 Purpose
 
@@ -17,42 +18,43 @@ This template provides a structured approach to organizing project documentation
 
 ## 🚀 Quick Start
 
-### Option 1: Use the CLI Tool (Recommended)
+### Option 1: Binary Download (Recommended)
 
-1. **Install the tool:**
+1. **Download the binary** for your platform from [Releases](https://github.com/your-username/claude-doc-structure/releases)
+
+2. **Make it executable and add to PATH:**
    ```bash
-   git clone https://github.com/your-username/claude-doc-structure.git
-   cd claude-doc-structure
-   make install
+   chmod +x claude-docs
+   sudo mv claude-docs /usr/local/bin/
    ```
 
-2. **Initialize your project:**
+3. **Start using immediately:**
    ```bash
    claude-docs init my-project
-   ```
-
-3. **Start using the tools:**
-   ```bash
-   # Generate templates
    claude-docs template api users
-   
-   # Split large documents
-   claude-docs split README.md --by-headers
-   
-   # Merge multiple documents
-   claude-docs merge specs/ --output combined.md
-   
-   # Validate structure
    claude-docs validate
    ```
 
-### Option 2: Manual Setup
+### Option 2: Build from Source
+
+1. **Clone and build:**
+   ```bash
+   git clone https://github.com/your-username/claude-doc-structure.git
+   cd claude-doc-structure
+   make build
+   ```
+
+2. **Use the binary:**
+   ```bash
+   ./bin/claude-docs init my-project
+   ```
+
+### Option 3: Manual Setup
 
 1. **Copy the structure** to your project:
    ```bash
    git clone https://github.com/your-username/claude-doc-structure.git
-   cp -r claude-doc-structure/.claude ./
-   cp claude-doc-structure/CLAUDE.md ./
+   cp -r claude-doc-structure/templates/* ./
    ```
 
 2. **Customize CLAUDE.md** with your project details and start collaborating!
@@ -65,15 +67,17 @@ your-project/
 ├── specs/                 # Detailed specifications
 │   ├── api.md            # API documentation
 │   └── screens.md        # UI/UX specifications
-├── .claude/              # Claude Code assets
-│   ├── prompts/          # Reusable prompt templates
-│   └── templates/        # Documentation templates
-├── scripts/              # Documentation utilities
-│   ├── split_docs.py     # Split large docs into smaller files
-│   └── merge_docs.py     # Merge docs for comprehensive view
-├── claude-docs           # Unified CLI tool
-├── Makefile             # Convenient shortcuts
-└── setup.py             # Package configuration
+└── .claude/              # Claude Code assets
+    ├── prompts/          # Reusable prompt templates
+    └── templates/        # Documentation templates
+
+claude-doc-structure/ (this repo)
+├── main.go               # CLI entry point
+├── go.mod               # Go module definition
+├── cmd/                 # CLI commands
+├── internal/            # Document processing logic
+├── bin/claude-docs      # Built binary (after make build)
+└── Makefile            # Build automation
 ```
 
 ## 📖 Documentation Approach
@@ -92,7 +96,7 @@ your-project/
 
 **Stage 3: Hierarchical Structure (Large Projects)**
 - Organize by features and modules
-- Use `scripts/split_docs.py` for automated organization
+- Use `claude-docs split` for automated organization
 - Maintain cross-references between documents
 
 ### Best Practices
@@ -128,28 +132,25 @@ claude-docs merge <directory> [options]   # Merge multiple documents
 claude-docs template <type> [name]        # Generate documentation templates
 ```
 
-### Makefile Shortcuts
+### CLI Options & Features
 
-For even easier usage, use the provided Makefile:
-
+**Document Splitting:**
 ```bash
-make help                                  # Show all available commands
-make init                                  # Initialize documentation structure
-make split FILE=large-doc.md              # Split a document
-make merge DIR=specs/                     # Merge documents
-make template TYPE=api NAME=users         # Generate template
-make validate                             # Validate structure
+claude-docs split large-doc.md --by-headers --max-sections 8
+claude-docs split large-doc.md --by-size --max-size-kb 50
+claude-docs split large-doc.md --by-lines --lines-per-file 200
 ```
 
-### Document Management Scripts
-
-**Direct script usage (if you prefer):**
+**Document Merging:**
 ```bash
-# Split large documentation
-python scripts/split_docs.py specs/large-spec.md --by-headers --max-sections 5
+claude-docs merge specs/ --output combined.md
+claude-docs merge docs/ --recursive --exclude "*.draft.md"
+claude-docs merge . --pattern "*.md" --no-claude-optimization
+```
 
-# Merge for comprehensive review
-python scripts/merge_docs.py specs/ --output combined.md
+**Cross-Platform Builds:**
+```bash
+make release    # Build for Linux, macOS, Windows (x64 & ARM64)
 ```
 
 ### Template System
@@ -247,48 +248,55 @@ See `examples/large-project/` for a comprehensive multi-service application stru
 
 ## 🚀 Installation
 
-### Quick Install
+### Binary Installation (Recommended)
+```bash
+# Download from GitHub Releases
+curl -L https://github.com/your-username/claude-doc-structure/releases/latest/download/claude-docs-linux-amd64 -o claude-docs
+chmod +x claude-docs
+sudo mv claude-docs /usr/local/bin/
+```
+
+### Build from Source
 ```bash
 git clone https://github.com/your-username/claude-doc-structure.git
 cd claude-doc-structure
-make install
-```
-
-### Manual Install
-```bash
-pip install -e .
+make build
+# Binary will be in ./bin/claude-docs
 ```
 
 ### Requirements
-- Python 3.8+
-- No external dependencies (uses standard library only)
+- **Runtime**: None (single binary, zero dependencies)
+- **Build**: Go 1.21+ (only if building from source)
 
 ## 🆘 Troubleshooting
 
 **Command not found after installation:**
 ```bash
-# Make sure the script is executable
+# Make sure the binary is executable and in PATH
 chmod +x claude-docs
+which claude-docs  # Should show the path
 
-# Add to PATH or use full path
-export PATH=$PATH:$(pwd)
+# Or use full path
+./bin/claude-docs --help
 ```
 
 **Permission denied errors:**
 ```bash
-# Run with appropriate permissions
-sudo make install
+# Make sure you have write permissions to /usr/local/bin/
+sudo mv claude-docs /usr/local/bin/
 ```
 
 **For development:**
 ```bash
-# Install in development mode
-pip install -e ".[dev]"
+# Build and test
+make build
+./bin/claude-docs --help
 
 # Run tests
 make test
 
-# Run linting
+# Format and lint code
+make fmt
 make lint
 ```
 
@@ -323,8 +331,9 @@ MIT License - see [LICENSE](LICENSE) for details.
 | 🔄 **Document Merge** | Combine multiple docs for review | `claude-docs merge` |
 | 📝 **Template Gen** | Generate professional doc templates | `claude-docs template` |
 | ✅ **Structure Validation** | Verify documentation best practices | `claude-docs validate` |
-| 🛠️ **Makefile Support** | Convenient shortcuts for all operations | `make help` |
-| 📦 **Easy Install** | Simple installation process | `make install` |
+| 🏗️ **Cross-Platform** | Single binary for Linux, macOS, Windows | `make release` |
+| ⚡ **Zero Dependencies** | No runtime dependencies needed | Download & run |
+| 🎯 **Claude Optimized** | Built specifically for Claude Code workflows | All commands |
 
 ---
 
