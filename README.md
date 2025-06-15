@@ -64,12 +64,15 @@ This template provides a structured approach to organizing project documentation
 ```
 your-project/
 ├── CLAUDE.md              # Main project context for Claude Code
-├── specs/                 # Detailed specifications
-│   ├── api.md            # API documentation
-│   └── screens.md        # UI/UX specifications
-└── .claude/              # Claude Code assets
-    ├── prompts/          # Reusable prompt templates
-    └── templates/        # Documentation templates
+├── .claude/               # Claude Code optimization files
+│   ├── context.md         # Project background and constraints
+│   ├── project-knowledge.md # Technical insights and patterns
+│   ├── project-improvements.md # Development history
+│   ├── common-patterns.md # Command patterns and workflows
+│   └── debug-log.md       # Issue resolution history
+└── specs/                 # Detailed specifications
+    ├── api.md            # API documentation
+    └── screens.md        # UI/UX specifications
 
 claude-doc-structure/ (this repo)
 ├── main.go               # CLI entry point
@@ -82,22 +85,39 @@ claude-doc-structure/ (this repo)
 
 ## 📖 Documentation Approach
 
-### Staged Documentation Strategy
+### Claude-Optimized Structure
 
-**Stage 1: Single File (Small Projects)**
-- Use only `CLAUDE.md`
-- Keep everything in one place for quick reference
-- Perfect for projects under 10,000 lines
+This project implements **systematic knowledge management** for AI-assisted development, inspired by [effective Claude knowledge management practices](https://zenn.dev/driller/articles/2a23ef94f1d603).
 
-**Stage 2: Split by Domain (Medium Projects)**
-- Create `specs/api.md`, `specs/screens.md`
-- Reference from `CLAUDE.md` using relative paths
-- Ideal for projects with multiple components
+**Core Philosophy:**
+- **Living Documentation**: Documents that evolve with your project
+- **Context Separation**: Organized information for quick AI access
+- **Pattern Recognition**: Reusable knowledge for consistent development
 
-**Stage 3: Hierarchical Structure (Large Projects)**
-- Organize by features and modules
-- Use `claude-docs split` for automated organization
-- Maintain cross-references between documents
+**Structure Benefits:**
+- Improved Claude Code understanding of project context
+- Faster onboarding for new team members
+- Systematic capture of development learnings
+- Reduced repetitive explanations across sessions
+
+### Documentation Layers
+
+**Layer 1: Quick Context (`CLAUDE.md`)**
+- Main project overview and current status
+- References to detailed context files
+- Key files and immediate project state
+
+**Layer 2: Detailed Context (`.claude/` directory)**
+- `context.md`: Project background, constraints, business context
+- `project-knowledge.md`: Technical architecture, patterns, decisions
+- `project-improvements.md`: Development history, lessons learned
+- `common-patterns.md`: Frequently used commands and workflows
+- `debug-log.md`: Issue resolution history and troubleshooting
+
+**Layer 3: Specifications (`specs/` directory)**
+- API documentation and endpoint specifications
+- UI/UX specifications and screen descriptions
+- Feature specifications and requirements
 
 ### Best Practices
 
@@ -320,6 +340,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 - [Claude Code Documentation](https://docs.anthropic.com/claude-code)
 - [Best Practices for AI-Assisted Development](https://github.com/anthropics/claude-code)
+- [Claude Knowledge Management (Zenn Article)](https://zenn.dev/driller/articles/2a23ef94f1d603) - **Inspiration for this project's documentation optimization approach**
 - [Markdown Guide](https://www.markdownguide.org/)
 
 ## 📊 Features Summary

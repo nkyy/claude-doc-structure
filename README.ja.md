@@ -52,7 +52,6 @@ Claude Code との効率的な協働のための包括的なドキュメント�
 ### 方法 3：手動セットアップ
 
 1. **構造をコピー**してプロジェクトに追加：
-
    ```bash
    git clone https://github.com/your-username/claude-doc-structure.git
    cp -r claude-doc-structure/templates/* ./
@@ -65,12 +64,15 @@ Claude Code との効率的な協働のための包括的なドキュメント�
 ```
 your-project/
 ├── CLAUDE.md              # Claude Code用のメインプロジェクトコンテキスト
-├── specs/                 # 詳細仕様書
-│   ├── api.md            # APIドキュメント
-│   └── screens.md        # UI/UX仕様書
-└── .claude/              # Claude Code用アセット
-    ├── prompts/          # 再利用可能なプロンプトテンプレート
-    └── templates/        # ドキュメントテンプレート
+├── .claude/               # Claude Code最適化ファイル群
+│   ├── context.md         # プロジェクト背景と制約
+│   ├── project-knowledge.md # 技術的洞察とパターン
+│   ├── project-improvements.md # 開発履歴
+│   ├── common-patterns.md # コマンドパターンとワークフロー
+│   └── debug-log.md       # 問題解決履歴
+└── specs/                 # 詳細仕様書
+    ├── api.md            # APIドキュメント
+    └── screens.md        # UI/UX仕様書
 
 claude-doc-structure/ (このリポジトリ)
 ├── main.go               # CLIエントリーポイント
@@ -83,37 +85,49 @@ claude-doc-structure/ (このリポジトリ)
 
 ## 📖 ドキュメントアプローチ
 
-### 段階的ドキュメント戦略
+### Claude最適化構造
 
-**段階 1：単一ファイル（小規模プロジェクト）**
+このプロジェクトは、[効果的なClaude知識管理手法](https://zenn.dev/driller/articles/2a23ef94f1d603)にインスパイアされた**体系的知識管理**をAI支援開発で実装しています。
 
-- `CLAUDE.md`のみを使用
-- 迅速な参照のためにすべてを一箇所に保持
-- 10,000 行未満のプロジェクトに最適
+**核となる理念：**
+- **生きた文書**: プロジェクトと共に進化するドキュメント
+- **コンテキスト分離**: AIの迅速なアクセスのための情報整理
+- **パターン認識**: 一貫した開発のための再利用可能な知識
 
-**段階 2：ドメイン別分割（中規模プロジェクト）**
+**構造の利点：**
+- Claude Codeのプロジェクトコンテキスト理解向上
+- 新しいチームメンバーの迅速なオンボーディング
+- 開発学習の体系的な記録
+- セッション間での反復説明の削減
 
-- `specs/api.md`、`specs/screens.md`を作成
-- `CLAUDE.md`から相対パスで参照
-- 複数コンポーネントを持つプロジェクトに理想的
+### ドキュメント階層
 
-**段階 3：階層構造（大規模プロジェクト）**
+**レイヤー1：クイックコンテキスト（`CLAUDE.md`）**
+- メインプロジェクト概要と現在の状況
+- 詳細なコンテキストファイルへの参照
+- 主要ファイルと即座のプロジェクト状態
 
-- 機能とモジュール別に整理
-- 自動化された整理のために`claude-docs split`を使用
-- ドキュメント間の相互参照を維持
+**レイヤー2：詳細コンテキスト（`.claude/`ディレクトリ）**
+- `context.md`: プロジェクト背景、制約、ビジネスコンテキスト
+- `project-knowledge.md`: 技術アーキテクチャ、パターン、決定事項
+- `project-improvements.md`: 開発履歴、学んだ教訓
+- `common-patterns.md`: よく使うコマンドとワークフロー
+- `debug-log.md`: 問題解決履歴とトラブルシューティング
+
+**レイヤー3：仕様書（`specs/`ディレクトリ）**
+- APIドキュメントとエンドポイント仕様
+- UI/UX仕様と画面説明
+- 機能仕様と要件
 
 ### ベストプラクティス
 
 **Claude Code 統合のために：**
-
 - 明確で説明的なヘッダーを使用
 - 行番号付きのファイルパスを含める: `src/api/users.js:42`
 - ドキュメント全体で一貫した用語を維持
 - 最適なパフォーマンスのためファイルあたり 200KB 未満にコンテキストを保持
 
 **ドキュメント作成：**
-
 - 目的とコンテキストを先頭に記載
 - 抽象的な説明よりも例を使用
 - 更新に「何が変わったか」と「なぜか」を含める
@@ -179,7 +193,6 @@ claude-docs template feature authentication
 ### 一般的なワークフロー
 
 **1. 新しいプロジェクトの開始：**
-
 ```bash
 # 構造を初期化
 claude-docs init my-awesome-app
@@ -194,7 +207,6 @@ claude-docs validate
 ```
 
 **2. 大きなドキュメントの管理：**
-
 ```bash
 # 大きな仕様書を管理しやすいチャンクに分割
 claude-docs split specs/massive-api-spec.md --by-headers --max-sections 8
@@ -204,7 +216,6 @@ claude-docs merge specs/ --output complete-api-docs.md
 ```
 
 **3. チームコラボレーション：**
-
 ```bash
 # 各チームメンバーが自分のセクションで作業
 claude-docs merge specs/ --exclude work-in-progress.md --output team-review.md
@@ -214,41 +225,32 @@ claude-docs validate
 ```
 
 ### 小規模プロジェクトの例
-
 ```markdown
 # TodoApp 用の CLAUDE.md
 
 ## プロジェクト概要
-
 ローカルストレージを使ったシンプルな React todo アプリケーション。
 
 ## 主要ファイル
-
 - `src/App.js:1` - メインコンポーネント
 - `src/components/TodoList.js:15` - Todo リストロジック
 - `src/utils/storage.js:8` - ローカルストレージユーティリティ
 
 ## 現在の焦点
-
 Firebase を使ったユーザー認証の追加。
 ```
 
 ### 生成されるテンプレートの例
-
 `claude-docs template api users`を実行すると以下が生成されます：
-
 ```markdown
 # Users API エンドポイント
 
 ## 概要
-
 このエンドポイントの目的についての簡単な説明。
 
 ## HTTP メソッドと URL
 ```
-
 GET/POST/PUT/DELETE /api/users
-
 ```
 
 ## パラメータ
@@ -262,7 +264,6 @@ GET/POST/PUT/DELETE /api/users
 ```
 
 ### 大規模プロジェクトの例
-
 包括的なマルチサービスアプリケーション構造については`examples/large-project/`を参照してください。
 
 ## 🚀 インストール
@@ -290,7 +291,6 @@ make build
 ## 🆘 トラブルシューティング
 
 **インストール後にコマンドが見つからない：**
-
 ```bash
 # バイナリが実行可能でPATHにあるか確認
 chmod +x claude-docs
@@ -301,14 +301,12 @@ which claude-docs  # パスが表示されるはず
 ```
 
 **権限エラー：**
-
 ```bash
 # /usr/local/bin/ への書き込み権限があるか確認
 sudo mv claude-docs /usr/local/bin/
 ```
 
 **開発用：**
-
 ```bash
 # ビルドとテスト
 make build
@@ -342,6 +340,7 @@ MIT ライセンス - 詳細は[LICENSE](LICENSE)をご覧ください。
 
 - [Claude Code ドキュメント](https://docs.anthropic.com/claude-code)
 - [AI 支援開発のベストプラクティス](https://github.com/anthropics/claude-code)
+- [Claude 知識管理 (Zenn記事)](https://zenn.dev/driller/articles/2a23ef94f1d603) - **このプロジェクトのドキュメント最適化アプローチのインスピレーション**
 - [Markdown ガイド](https://www.markdownguide.org/)
 
 ## 📊 機能一覧

@@ -2,9 +2,18 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Quick Context Access
+
+**Essential Files for AI Context:**
+- `.claude/context.md` - Project background, constraints, and requirements
+- `.claude/project-knowledge.md` - Technical architecture and patterns  
+- `.claude/project-improvements.md` - Development history and lessons learned
+- `.claude/common-patterns.md` - Frequently used command patterns
+- `.claude/debug-log.md` - Critical issues and troubleshooting
+
 ## Project Overview
 
-Claude Doc Structure is a documentation toolkit that provides templates, tools, and best practices for organizing project context to maximize Claude Code's effectiveness. It transforms documentation chaos into Claude-optimized clarity through systematic organization and automation.
+Claude Doc Structure is a documentation toolkit that transforms documentation chaos into Claude-optimized clarity through systematic organization and automation. **Key Achievement: Successfully migrated from Python to Go with zero runtime dependencies and Homebrew distribution.**
 
 ## Architecture & Technology Stack
 
@@ -90,30 +99,33 @@ make lint                      # Code quality checks
 - Cross-platform builds for Linux, macOS, Windows (x64/ARM64)
 - Template placeholders use `{name}` format
 
-## Current Development Focus
+## Current Development Status
 
-**Go Migration (Completed):**
-The project has been migrated from Python to Go for better environment independence:
-- ✅ Zero runtime dependencies - single binary deployment
-- ✅ Cross-platform builds for all major platforms  
-- ✅ Improved performance and faster startup times
-- ✅ Maintained all original functionality and CLI interface
+**✅ Completed Milestones:**
+- Python to Go migration with zero runtime dependencies
+- Cross-platform builds (Linux, macOS, Windows x64/ARM64)
+- GitHub Actions automated release pipeline
+- Homebrew integration (`brew install nkyy/claude-doc/claude-doc`)
+- Optimized documentation structure following Zenn best practices
 
-**Next Steps:**
-- Add comprehensive test suite
-- Implement GitHub Actions for automated releases
-- Add configuration file support (.claude-docs.yaml)
-- Enhanced template customization options
+**🔄 Active Development:**
+- Comprehensive test suite implementation
+- Enhanced error handling and debugging capabilities
+- Performance optimization for large document processing
+
+**📋 Next Priority:**
+- Configuration file support (.claude-docs.yaml)
+- Plugin system for custom document processors
+- Team collaboration features
 
 **Documentation Maintenance:**
-- **IMPORTANT**: When making improvements or changes to the project, always update the README.md to reflect:
-  - New features and capabilities
-  - Changed installation instructions
-  - Updated command examples
-  - Modified project structure
-- Keep README.md synchronized with actual functionality
-- Update badges and version information as needed
-- Ensure all code examples in README.md are tested and working
+- **IMPORTANT**: When making improvements or changes to the project, always update:
+  - `README.md` - User-facing documentation and installation instructions
+  - `.claude/project-improvements.md` - Record all changes and lessons learned
+  - `.claude/debug-log.md` - Document any issues encountered and solutions
+  - `.claude/project-knowledge.md` - Update technical insights and patterns
+- Keep all documentation synchronized with actual functionality
+- Update version information and command examples as needed
 
 ## Testing Strategy
 
