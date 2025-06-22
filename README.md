@@ -15,6 +15,8 @@ This template provides a structured approach to organizing project documentation
 - Reduce repetitive explanations through organized documentation
 - Maintain consistency across development sessions
 - Scale documentation efficiently as your project grows
+- Support multiple programming languages with tailored configurations
+- Leverage adaptive-trading project insights for real-world optimization
 
 ## 🚀 Quick Start
 
@@ -69,10 +71,15 @@ your-project/
 │   ├── project-knowledge.md # Technical insights and patterns
 │   ├── project-improvements.md # Development history
 │   ├── common-patterns.md # Command patterns and workflows
-│   └── debug-log.md       # Issue resolution history
+│   ├── debug-log.md       # Issue resolution history
+│   ├── project-specifics.md # Project-specific information
+│   ├── ai-collaboration.md # AI collaboration best practices
+│   └── code-patterns.md   # Common code patterns and solutions
 └── specs/                 # Detailed specifications
-    ├── api.md            # API documentation
-    └── screens.md        # UI/UX specifications
+    ├── api.md            # API documentation (basic)
+    ├── api-spec.md       # Comprehensive API specification
+    ├── screens.md        # UI/UX specifications (basic)
+    └── ui-spec.md        # Detailed UI specification
 
 claude-doc-structure/ (this repo)
 ├── main.go               # CLI entry point
@@ -115,9 +122,14 @@ This project implements **systematic knowledge management** for AI-assisted deve
 - `debug-log.md`: Issue resolution history and troubleshooting
 
 **Layer 3: Specifications (`specs/` directory)**
-- API documentation and endpoint specifications
-- UI/UX specifications and screen descriptions
+- `api.md` / `api-spec.md`: API documentation and endpoint specifications
+- `screens.md` / `ui-spec.md`: UI/UX specifications and screen descriptions  
 - Feature specifications and requirements
+
+**Language-Specific Templates (`templates/langs/`)**
+- Python: `requirements.txt`, `.env.example`, `pyproject.toml`
+- Node.js: `package.json`, `.env.example`, TypeScript configs
+- Go: `go.mod`, `Makefile`, `.env.example`
 
 ### Best Practices
 
@@ -150,6 +162,7 @@ claude-docs merge <directory> [options]   # Merge multiple documents
 
 # Template generation
 claude-docs template <type> [name]        # Generate documentation templates
+#   Types: api, screen, feature, python, nodejs, go
 ```
 
 ### CLI Options & Features
@@ -201,6 +214,11 @@ claude-docs init my-awesome-app
 claude-docs template api authentication
 claude-docs template screen login
 claude-docs template feature user-management
+
+# Generate language-specific configurations
+claude-docs template python my-api      # Creates Python-specific files
+claude-docs template nodejs my-frontend # Creates Node.js setup
+claude-docs template go my-service      # Creates Go project files
 
 # Validate everything is set up correctly
 claude-docs validate
@@ -319,6 +337,30 @@ make test
 make fmt
 make lint
 ```
+
+## ✨ New Features in Latest Version
+
+### Enhanced Templates
+- **Language-Specific Support**: Python, Node.js, and Go project templates
+- **Advanced AI Collaboration**: Best practices for Claude Code integration
+- **Project-Specific Documentation**: Tailored templates for unique project needs
+- **Comprehensive Specifications**: Detailed API and UI specification templates
+
+### Template Types Available
+```bash
+# Documentation templates
+claude-docs template api [name]       # Basic API documentation
+claude-docs template screen [name]    # UI/screen specifications  
+claude-docs template feature [name]   # Feature specifications
+
+# Language-specific templates (coming soon)
+claude-docs template python [name]    # Python project setup
+claude-docs template nodejs [name]    # Node.js project setup
+claude-docs template go [name]        # Go project setup
+```
+
+### Inspired by Real Projects
+These templates incorporate patterns learned from production projects like adaptive-trading, ensuring practical applicability and real-world effectiveness.
 
 ## 🤝 Contributing
 

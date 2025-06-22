@@ -122,6 +122,8 @@ generated-docs/
 # Test outputs
 test-output/
 test-results/
+test-dir/
+test-*/
 
 # Local development
 .local/

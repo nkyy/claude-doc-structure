@@ -12,7 +12,7 @@ import (
 var templateCmd = &cobra.Command{
 	Use:   "template <type> [name]",
 	Short: "Generate documentation templates",
-	Long:  "Generate documentation templates for API endpoints, screens, or features.",
+	Long:  "Generate documentation templates for API endpoints, screens, features, or language-specific configurations.",
 	Args:  cobra.RangeArgs(1, 2),
 	Run: func(cmd *cobra.Command, args []string) {
 		templateType := args[0]

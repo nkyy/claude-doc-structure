@@ -20,6 +20,15 @@ var initCmd = &cobra.Command{
 	},
 }
 
+func readFromTemplateFile(templatePath, projectName string) string {
+	content, err := os.ReadFile(templatePath)
+	if err != nil {
+		fmt.Printf("Warning: Could not read template file %s: %v\n", templatePath, err)
+		return fmt.Sprintf("# %s Template\n\nTemplate file not found", projectName)
+	}
+	return strings.ReplaceAll(string(content), "{name}", projectName)
+}
+
 func getProjectName(args []string) string {
 	if len(args) > 0 {
 		return args[0]
@@ -69,6 +78,9 @@ func initProject(projectName string) {
 		".claude/project-improvements.md": loadTemplate(".claude/project-improvements.md", projectName),
 		".claude/common-patterns.md":      loadTemplate(".claude/common-patterns.md", projectName),
 		".claude/debug-log.md":            loadTemplate(".claude/debug-log.md", projectName),
+		".claude/project-specifics.md":    loadTemplate(".claude/project-specifics.md", projectName),
+		".claude/ai-collaboration.md":     loadTemplate(".claude/ai-collaboration.md", projectName),
+		".claude/code-patterns.md":        loadTemplate(".claude/code-patterns.md", projectName),
 	}
 	
 	for filePath, content := range templateFiles {
@@ -426,6 +438,15 @@ alias build='npm run build'
 alias {project_name}-dev='cd ~/projects/{project_name} && npm run dev'
 alias {project_name}-test='cd ~/projects/{project_name} && npm test'
 ` + "```", "{project_name}", projectName)
+
+	case ".claude/project-specifics.md":
+		return readFromTemplateFile("templates/.claude/project-specifics.md", projectName)
+	
+	case ".claude/ai-collaboration.md":
+		return readFromTemplateFile("templates/.claude/ai-collaboration.md", projectName)
+	
+	case ".claude/code-patterns.md":
+		return readFromTemplateFile("templates/.claude/code-patterns.md", projectName)
 
 	case ".claude/debug-log.md":
 		return `# Debug Log & Issue Resolution
